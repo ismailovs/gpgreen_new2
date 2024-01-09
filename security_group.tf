@@ -43,16 +43,6 @@ module "webtier_sg" {
           to_port     = 80
           protocol    = "tcp"
           cidr_blocks = ["0.0.0.0/0"]
-          security_groups = [module.webtier_alb_sg.security_group_id["webtier_alb_sg"]]
-        },
-        {
-          description     = "my_ssh"
-          priority        = 208
-          from_port       = 22
-          to_port         = 22
-          protocol        = "tcp"
-          cidr_blocks     = ["0.0.0.0/0"]
-          security_groups = [module.bastion_sg.security_group_id["bastion_sg"]]
         },
         {
           description = "ingress rule for https"
@@ -61,6 +51,14 @@ module "webtier_sg" {
           to_port     = 443
           protocol    = "tcp"
           cidr_blocks = ["0.0.0.0/0"]
+        },
+        {
+          description     = "my_ssh"
+          priority        = 208
+          from_port       = 22
+          to_port         = 22
+          protocol        = "tcp"
+          security_groups = [module.bastion_sg.security_group_id["bastion_sg"]]
         }
       ]
       egress_rules = [
@@ -85,20 +83,20 @@ module "webtier_alb_sg" {
       description = "Security group for Application Load Balancer at web servers"
       ingress_rules = [
         {
-          description     = "ingress rule for http"
-          priority        = 204
-          from_port       = 80
-          to_port         = 80
-          protocol        = "tcp"
-          cidr_blocks      = ["0.0.0.0/0"]
+          description = "ingress rule for http"
+          priority    = 204
+          from_port   = 80
+          to_port     = 80
+          protocol    = "tcp"
+          cidr_blocks = ["0.0.0.0/0"]
         },
         {
-          description     = "ingress rule for https"
-          priority        = 204
-          from_port       = 443
-          to_port         = 443
-          protocol        = "tcp"
-          cidr_blocks      = ["0.0.0.0/0"]
+          description = "ingress rule for https"
+          priority    = 204
+          from_port   = 443
+          to_port     = 443
+          protocol    = "tcp"
+          cidr_blocks = ["0.0.0.0/0"]
         }
       ]
       egress_rules = [

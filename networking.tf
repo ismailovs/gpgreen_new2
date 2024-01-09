@@ -19,10 +19,10 @@ resource "aws_vpc" "main" {
 
 # Subnets(6): subnet_pub_1a, subnet_pub_1b
 resource "aws_subnet" "pub_subnet" {
-  for_each          = var.pub_subnets
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = each.value.cidr_block
-  availability_zone = each.value.availability_zone
+  for_each                = var.pub_subnets
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = each.value.cidr_block
+  availability_zone       = each.value.availability_zone
   map_public_ip_on_launch = true
   tags = {
     Name = join("-", [var.prefix, each.key])

@@ -1,3 +1,53 @@
+# Launch Template for apptier ASG
+resource "aws_launch_template" "template-app" {
+  name_prefix            = "apptier-instance"
+  image_id               = "ami-01450e8988a4e7f44"
+  key_name               = aws_key_pair.key.id
+  instance_type          = "t2.micro"
+  user_data              = filebase64("${path.module}/web.sh")
+  vpc_security_group_ids = [module.apptier_sg.security_group_id["apptier_sg"]]
+  tags = {
+    Name = "${var.prefix}-apptier_alb_lt"
+  }
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "app instance"
+    }
+  }
+}
+#Auto Scaling Group app-1
+resource "aws_autoscaling_group" "asg-2a" {
+  name                 = "autoscaling-group-apptier-2a"
+  vpc_zone_identifier  = [aws_subnet.pvt_subnet["subnet_pvt_2a"].id]
+  desired_capacity     = 1
+  max_size             = 2
+  min_size             = 1
+  health_check_type    = "EC2"
+  termination_policies = ["OldestInstance"]
+  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
+  launch_template {
+    id      = aws_launch_template.template-app.id
+    version = "$Latest"
+  }
+}
+#Auto Scaling Group app-2
+resource "aws_autoscaling_group" "asg-2b" {
+  name                 = "autoscaling-group-apptier-2b"
+  vpc_zone_identifier  = [aws_subnet.pvt_subnet["subnet_pvt_2b"].id]
+  desired_capacity     = 1
+  max_size             = 2
+  min_size             = 1
+  health_check_type    = "EC2"
+  termination_policies = ["OldestInstance"]
+  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
+  launch_template {
+    id      = aws_launch_template.template-app.id
+    version = "$Latest"
+  }
+}
+
 ##############################################################################
 #Application LB for apptier
 resource "aws_lb" "apptier_alb" {
@@ -57,45 +107,3 @@ output "elb-app-dns-name" {
   value = aws_lb.apptier_alb.dns_name
 }
 ##############################################################################
-# Launch Template for apptier ASG
-resource "aws_launch_template" "template" {
-  name_prefix            = "apptier-instance"
-  image_id               = "ami-01450e8988a4e7f44"
-  key_name               = "${var.prefix}-key"
-  instance_type          = "t2.micro"
-  user_data              = filebase64("${path.module}/web.sh")
-  vpc_security_group_ids = [module.apptier_sg.security_group_id["apptier_sg"]]
-  tags = {
-      Name = "${var.prefix}-apptier_alb_lt"
-     }
-}
-#Auto Scaling Group app-1
-resource "aws_autoscaling_group" "asg-2a" {
-  name                 = "autoscaling-group-apptier-2a"
-  vpc_zone_identifier  = [aws_subnet.pvt_subnet["subnet_pvt_2a"].id]
-  desired_capacity     = 1
-  max_size             = 2
-  min_size             = 1
-  health_check_type    = "EC2"
-  termination_policies = ["OldestInstance"]
-  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
-  launch_template {
-    id      = aws_launch_template.template.id
-    version = "$Latest"
-  }
-}
-#Auto Scaling Group app-2
-resource "aws_autoscaling_group" "asg-2b" {
-  name                 = "autoscaling-group-apptier-2b"
-  vpc_zone_identifier  = [aws_subnet.pvt_subnet["subnet_pvt_2b"].id]
-  desired_capacity     = 1
-  max_size             = 2
-  min_size             = 1
-  health_check_type    = "EC2"
-  termination_policies = ["OldestInstance"]
-  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
-  launch_template {
-    id      = aws_launch_template.template.id
-    version = "$Latest"
-  }
-}

@@ -1,3 +1,54 @@
+# Launch Template for webtier ASG
+resource "aws_launch_template" "template-web" {
+  name_prefix            = "webtier-instance"
+  image_id               = "ami-01450e8988a4e7f44"
+  key_name               = aws_key_pair.key.id
+  instance_type          = "t2.micro"
+  user_data              = filebase64("${path.module}/web.sh")
+  vpc_security_group_ids = [module.webtier_sg.security_group_id["webtier_sg"]]
+  tags = {
+    Name = "${var.prefix}-web_lt"
+  }
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "web instance"
+    }
+  }
+}
+#Auto Scaling Group web-1
+resource "aws_autoscaling_group" "asg-1a" {
+  name                 = "autoscaling-group-webtier-1a"
+  vpc_zone_identifier  = [aws_subnet.pub_subnet["subnet_pub_1a"].id]
+  desired_capacity     = 1
+  max_size             = 2
+  min_size             = 1
+  health_check_type    = "EC2"
+  termination_policies = ["OldestInstance"]
+  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
+  launch_template {
+    id      = aws_launch_template.template-web.id
+    version = "$Latest"
+  }
+
+}
+#Auto Scaling Group web-2
+resource "aws_autoscaling_group" "asg-1b" {
+  name                 = "autoscaling-group-webtier-1b"
+  vpc_zone_identifier  = [aws_subnet.pub_subnet["subnet_pub_1b"].id]
+  desired_capacity     = 1
+  max_size             = 2
+  min_size             = 1
+  health_check_type    = "EC2"
+  termination_policies = ["OldestInstance"]
+  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
+  launch_template {
+    id      = aws_launch_template.template-web.id
+    version = "$Latest"
+  }
+}
+
 ########################################################
 #Application LB for webtier
 resource "aws_lb" "webtier_alb" {
@@ -28,7 +79,7 @@ resource "aws_lb_target_group" "target_group" {
     unhealthy_threshold = 2
     matcher             = "200"
   }
-   tags = {
+  tags = {
     Name = "${var.prefix}-target_group_web"
   }
 }
@@ -50,45 +101,3 @@ output "elb-web-dns-name" {
 }
 
 ###################################################################
-# Launch Template for webtier ASG
-resource "aws_launch_template" "template-web" {
-  name_prefix            = "webtier-instance"
-  image_id               = "ami-01450e8988a4e7f44"
-  key_name               = "${var.prefix}-key"
-  instance_type          = "t2.micro"
-  user_data              = filebase64("${path.module}/web.sh")
-  vpc_security_group_ids = [module.webtier_sg.security_group_id["webtier_sg"]]
-  tags = {
-      Name = "${var.prefix}-webtier_alb_lt"
-     }
-}
-#Auto Scaling Group web-1
-resource "aws_autoscaling_group" "asg-1a" {
-  name                 = "autoscaling-group-webtier-1a"
-  vpc_zone_identifier  = [aws_subnet.pub_subnet["subnet_pub_1a"].id]
-  desired_capacity     = 1
-  max_size             = 2
-  min_size             = 1
-  health_check_type    = "EC2"
-  termination_policies = ["OldestInstance"]
-  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
-    launch_template {
-    id      = aws_launch_template.template-web.id
-    version = "$Latest"
-  }
-}
-#Auto Scaling Group web-2
-resource "aws_autoscaling_group" "asg-1b" {
-  name                 = "autoscaling-group-webtier-1b"
-  vpc_zone_identifier  = [aws_subnet.pub_subnet["subnet_pub_1b"].id]
-  desired_capacity     = 1
-  max_size             = 2
-  min_size             = 1
-  health_check_type    = "EC2"
-  termination_policies = ["OldestInstance"]
-  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
-  launch_template {
-    id      = aws_launch_template.template-web.id
-    version = "$Latest"
-  }
-}
