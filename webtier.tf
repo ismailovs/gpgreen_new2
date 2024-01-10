@@ -24,9 +24,9 @@ resource "aws_autoscaling_group" "asg-1a" {
   desired_capacity     = 1
   max_size             = 2
   min_size             = 1
-  health_check_type    = "EC2"
+  health_check_type    = "ELB"
   termination_policies = ["OldestInstance"]
-  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
+  target_group_arns    = [aws_lb_target_group.target_group_web.arn]
   launch_template {
     id      = aws_launch_template.template-web.id
     version = "$Latest"
@@ -40,9 +40,9 @@ resource "aws_autoscaling_group" "asg-1b" {
   desired_capacity     = 1
   max_size             = 2
   min_size             = 1
-  health_check_type    = "EC2"
+  health_check_type    = "ELB"
   termination_policies = ["OldestInstance"]
-  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
+  target_group_arns    = [aws_lb_target_group.target_group_web.arn]
   launch_template {
     id      = aws_launch_template.template-web.id
     version = "$Latest"
@@ -64,7 +64,7 @@ resource "aws_lb" "webtier_alb" {
 }
 
 # Target Group for webtier Application LB
-resource "aws_lb_target_group" "target_group" {
+resource "aws_lb_target_group" "target_group_web" {
   name        = "web-tg"
   port        = 80
   protocol    = "HTTP"
@@ -81,6 +81,10 @@ resource "aws_lb_target_group" "target_group" {
   tags = {
     Name = "${var.prefix}-target_group_web"
   }
+    stickiness {
+    type            = "lb_cookie"
+    cookie_duration = 120
+  }
 }
 
 # Listener for Application LB of webtier
@@ -89,9 +93,19 @@ resource "aws_lb_listener" "alb_listener" {
   port              = 80
   protocol          = "HTTP"
   default_action {
-    target_group_arn = aws_lb_target_group.target_group.arn
+    target_group_arn = aws_lb_target_group.target_group_web.arn
     type             = "forward"
   }
+}
+
+resource "aws_autoscaling_attachment" "apptier_asa_1a" {
+  autoscaling_group_name = aws_autoscaling_group.asg-1a.id
+  lb_target_group_arn    = aws_lb_target_group.target_group_web.arn
+}
+
+resource "aws_autoscaling_attachment" "apptier_asa_1b" {
+  autoscaling_group_name = aws_autoscaling_group.asg-1b.id
+  lb_target_group_arn    = aws_lb_target_group.target_group_web.arn
 }
 
 # Output

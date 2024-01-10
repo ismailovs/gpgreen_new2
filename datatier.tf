@@ -136,6 +136,7 @@ resource "aws_route_table_association" "rta_pvt_3b" {
 
 output "db_password" {
   value = random_password.password.result  
+  sensitive = true
 }
 
 output "db_endpoint" {

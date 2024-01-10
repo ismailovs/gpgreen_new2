@@ -24,7 +24,7 @@ resource "aws_autoscaling_group" "asg-2a" {
   desired_capacity     = 1
   max_size             = 2
   min_size             = 1
-  health_check_type    = "EC2"
+  health_check_type    = "ELB"
   termination_policies = ["OldestInstance"]
   target_group_arns    = [aws_lb_target_group.target_group_app.arn]
   launch_template {
@@ -39,7 +39,7 @@ resource "aws_autoscaling_group" "asg-2b" {
   desired_capacity     = 1
   max_size             = 2
   min_size             = 1
-  health_check_type    = "EC2"
+  health_check_type    = "ELB"
   termination_policies = ["OldestInstance"]
   target_group_arns    = [aws_lb_target_group.target_group_app.arn]
   launch_template {
@@ -94,6 +94,16 @@ resource "aws_lb_listener" "alb_listener_apptier" {
   tags = {
     Name = "${var.prefix}-apptier_alb_listener"
   }
+}
+
+resource "aws_autoscaling_attachment" "apptier_asa_2a" {
+  autoscaling_group_name = aws_autoscaling_group.asg-2a.id
+  lb_target_group_arn    = aws_lb_target_group.target_group_app.arn
+}
+
+resource "aws_autoscaling_attachment" "apptier_asa_2b" {
+  autoscaling_group_name = aws_autoscaling_group.asg-2b.id
+  lb_target_group_arn    = aws_lb_target_group.target_group_app.arn
 }
 
 # Output
