@@ -65,7 +65,7 @@ resource "aws_lb" "webtier_alb" {
 
 # Target Group for webtier Application LB
 resource "aws_lb_target_group" "target_group_web" {
-  name        = "web-tg"
+  name        = "web-tg" 
   port        = 80
   protocol    = "HTTP"
   target_type = "instance"

@@ -44,7 +44,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket-config" {
     }
 
     expiration {
-      date = "2025-01-13T00:00:00Z"
+      date = "2024-02-13T00:00:00Z"
     }
 
     status = "Enabled"
