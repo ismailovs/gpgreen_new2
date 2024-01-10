@@ -49,7 +49,6 @@ resource "aws_autoscaling_group" "asg-1b" {
   }
 }
 
-########################################################
 #Application LB for webtier
 resource "aws_lb" "webtier_alb" {
   name                       = "web-lb-tf"
@@ -99,5 +98,3 @@ resource "aws_lb_listener" "alb_listener" {
 output "elb-web-dns-name" {
   value = aws_lb.webtier_alb.dns_name
 }
-
-###################################################################

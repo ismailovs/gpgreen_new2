@@ -28,6 +28,7 @@ module "bastion_sg" {
     }
   }
 }
+
 # Security Group for webtier
 module "webtier_sg" {
   source = "./modules/security_groups"
@@ -74,6 +75,7 @@ module "webtier_sg" {
     }
   }
 }
+
 # Security Group for web application load balancer
 module "webtier_alb_sg" {
   source = "./modules/security_groups"
@@ -112,6 +114,7 @@ module "webtier_alb_sg" {
     }
   }
 }
+
 # Security Group for apptier
 module "apptier_sg" {
   source = "./modules/security_groups"
@@ -150,6 +153,7 @@ module "apptier_sg" {
     }
   }
 }
+
 # Security Group for app application load balancer
 module "apptier_alb_sg" {
   source = "./modules/security_groups"
@@ -180,6 +184,7 @@ module "apptier_alb_sg" {
     }
   }
 }
+
 # Security Group for datatier
 module "datatier_sg" {
   source = "./modules/security_groups"

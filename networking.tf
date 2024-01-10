@@ -28,7 +28,7 @@ resource "aws_subnet" "pub_subnet" {
     Name = join("-", [var.prefix, each.key])
   }
 }
-# Subnets(6): subnet_pvt_2a, subnet_pvt_2a, subnet_pvt_3a, subnet_pvt_3b
+# Subnets(6): subnet_pvt_2a, subnet_pvt_2a
 resource "aws_subnet" "pvt_subnet" {
   for_each          = var.pvt_subnets
   vpc_id            = aws_vpc.main.id
@@ -89,7 +89,7 @@ resource "aws_route_table" "rt_public" {
     gateway_id = aws_internet_gateway.gw.id
   }
   tags = {
-    Name = "${var.prefix}-public-rt"
+    Name = "gogreen-private AZone us-west-1a, us-west-1b"
   }
 }
 
@@ -103,47 +103,28 @@ resource "aws_route_table_association" "rta_pub_1b" {
   route_table_id = aws_route_table.rt_public.id
 }
 
-#Route Table (2) Private subnets 2a, 3a
-resource "aws_route_table" "rt_private_2a_3a" {
+#Route Table (2) Private subnets 2a, 2b
+resource "aws_route_table" "rt_private_2a_2b" {
   vpc_id = aws_vpc.main.id
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.gw-pub-1a.id
   }
   tags = {
-    Name = "gogreen-private AZone us-west-2a"
+    Name = "gogreen-private AZone us-west-2a, us-west-2b"
   }
 }
-#Route table Assosiation(1) Private subnets 2a, 3a
+#Route table Assosiation(1) Private subnets 2a, 2b
 resource "aws_route_table_association" "rta_pvt_2a" {
   subnet_id      = aws_subnet.pvt_subnet["subnet_pvt_2a"].id
-  route_table_id = aws_route_table.rt_private_2a_3a.id
+  route_table_id = aws_route_table.rt_private_2a_2b.id
 }
 resource "aws_route_table_association" "rta_pvt_2b" {
   subnet_id      = aws_subnet.pvt_subnet["subnet_pvt_2b"].id
-  route_table_id = aws_route_table.rt_private_2a_3a.id
+  route_table_id = aws_route_table.rt_private_2a_2b.id
 }
 
-#Route Table (2) Private subnets 2b, 3b
-resource "aws_route_table" "rt_private_2b_3b" {
-  vpc_id = aws_vpc.main.id
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.gw-pub-1b.id
-  }
-  tags = {
-    Name = "gogreen-private AZone us-west-2b"
-  }
-}
-#Route table Assosiation(1) Private subnets 2b, 3b
-resource "aws_route_table_association" "rta_pvt_3a" {
-  subnet_id      = aws_subnet.pvt_subnet["subnet_pvt_3a"].id
-  route_table_id = aws_route_table.rt_private_2b_3b.id
-}
-resource "aws_route_table_association" "rta_pvt_3b" {
-  subnet_id      = aws_subnet.pvt_subnet["subnet_pvt_3b"].id
-  route_table_id = aws_route_table.rt_private_2b_3b.id
-}
+
 
 
 

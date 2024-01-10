@@ -24,14 +24,14 @@ pvt_subnets = {
   subnet_pvt_2b = {
     cidr_block        = "10.0.4.0/24"
     availability_zone = "us-west-2b"
-  },
-  subnet_pvt_3a = {
-    cidr_block        = "10.0.5.0/24"
-    availability_zone = "us-west-2a"
-  },
-  subnet_pvt_3b = {
-    cidr_block        = "10.0.6.0/24"
-    availability_zone = "us-west-2b"
   }
+  # subnet_pvt_3a = {
+  #   cidr_block        = "10.0.5.0/24"
+  #   availability_zone = "us-west-2a"
+  # },
+  # subnet_pvt_3b = {
+  #   cidr_block        = "10.0.6.0/24"
+  #   availability_zone = "us-west-2b"
+  # }
 }
 
