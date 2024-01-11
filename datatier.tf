@@ -6,13 +6,13 @@ resource "random_password" "password" {
 }
 
 # Secret
-resource "aws_secretsmanager_secret" "cred" {
+resource "aws_secretsmanager_secret" "cred8" {
   name = "gogreen-secret"
 }
 
 # Secret version
 resource "aws_secretsmanager_secret_version" "cred-ver" {
-  secret_id = aws_secretsmanager_secret.cred.id
+  secret_id = aws_secretsmanager_secret.cred8.id
   secret_string = jsonencode({
     username = "dbadmin"
     password = random_password.password.result
