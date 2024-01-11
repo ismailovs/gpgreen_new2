@@ -4,7 +4,6 @@ resource "aws_launch_template" "template-app" {
   image_id               = "ami-01450e8988a4e7f44"
   key_name               = aws_key_pair.key.id
   instance_type          = "t2.micro"
-  user_data              = filebase64("${path.module}/web.sh")
   vpc_security_group_ids = [module.apptier_sg.security_group_id["apptier_sg"]]
   tags = {
     Name = "${var.prefix}-apptier_alb_lt"
