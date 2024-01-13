@@ -1,18 +1,12 @@
-#########################################
+# #########################################
+resource "aws_iam_user" "users" {
+  for_each = var.users
+  name     = each.value.name
+  tags = {
+    Name = join("-", [var.prefix, each.key])
+  }
+}
 
-# Users
-resource "aws_iam_user" "SysAdmin" {
-  for_each = toset(["sysadmin1", "sysadmin2"])
-  name     = each.key
-}
-resource "aws_iam_user" "DBAdmin" {
-  for_each = toset(["dbadmin1", "dbadmin2"])
-  name     = each.key
-}
-resource "aws_iam_user" "Monitoring" {
-  for_each = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
-  name     = each.key
-}
 
 # Groups
 resource "aws_iam_group" "sysadmin_group" {
@@ -57,89 +51,95 @@ resource "aws_iam_group_policy_attachment" "db_admin" {
 
 ############################################
 # Membership
-resource "aws_iam_group_membership" "team1" {
-  name     = "sysadmin_group-membership"
+resource "aws_iam_user_group_membership" "team1" {
   for_each = toset(["sysadmin1", "sysadmin2"])
-  users    = [aws_iam_user.SysAdmin[each.key].name]
-  group    = aws_iam_group.sysadmin_group.name
+  user     = "${aws_iam_user.users[each.key].name}"
+  groups    =[
+    "${aws_iam_group.sysadmin_group.name}"
+  ]
 }
-resource "aws_iam_group_membership" "team2" {
-  name     = "dbadmin_group-membership"
+resource "aws_iam_user_group_membership" "team2" {
   for_each = toset(["dbadmin1", "dbadmin2"])
-  users    = [aws_iam_user.DBAdmin[each.key].name]
-  group    = aws_iam_group.dbadmin_group.name
+  user     = "${aws_iam_user.users[each.key].name}"
+  groups    =[
+    "${aws_iam_group.dbadmin_group.name}"
+  ]
 }
-resource "aws_iam_group_membership" "team3" {
-  name     = "monitoring_group-membership"
-  for_each = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
-  users    = [aws_iam_user.Monitoring[each.key].name]
-  group    = aws_iam_group.Monitoring_Group.name
+resource "aws_iam_user_group_membership" "team3" {
+  for_each = toset(["monitor1", "monitor2", "monitor3", "monitor4"])
+  user     = "${aws_iam_user.users[each.key].name}"
+  groups    =[
+    "${aws_iam_group.Monitoring_Group.name}"
+  ]
 }
-
 
 ################################################
 # Login and Password
-resource "aws_iam_user_login_profile" "p1" {
-  for_each = toset(["sysadmin1", "sysadmin2"])
-  user     = aws_iam_user.SysAdmin[each.key].name
-
-  password_length = 10
+resource "aws_iam_user_login_profile" "pass" {
+  for_each = var.users
+  user     = aws_iam_user.users[each.key].name
 }
-resource "aws_iam_user_login_profile" "p2" {
-  for_each = toset(["dbadmin1", "dbadmin2"])
-  user     = aws_iam_user.DBAdmin[each.key].name
-
-  password_length = 10
-}
-resource "aws_iam_user_login_profile" "p3" {
-  for_each = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
-  user     = aws_iam_user.Monitoring[each.key].name
-
-  password_length = 10
+# Password policy (account-wide setting, and not attached to exact resource.)
+resource "aws_iam_account_password_policy" "strict" {
+  minimum_password_length        = 8
+  require_lowercase_characters   = true
+  require_numbers                = true
+  require_uppercase_characters   = true
+  require_symbols                = true
+  allow_users_to_change_password = true
+  hard_expiry                    = true
+  max_password_age               = 90
+  password_reuse_prevention      = 3
 }
 
-# Create access keys for users
-resource "aws_iam_access_key" "user_access_keys1" {
-  for_each = toset(["sysadmin1", "sysadmin2"])
-  user     = aws_iam_user.SysAdmin[each.key].name
-}
-resource "aws_iam_access_key" "user_access_keys2" {
-  for_each = toset(["dbadmin1", "dbadmin2"])
-  user     = aws_iam_user.DBAdmin[each.key].name
-}
-resource "aws_iam_access_key" "user_access_keys3" {
-  for_each = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
-  user     = aws_iam_user.Monitoring[each.key].name
-}
 
 resource "aws_secretsmanager_secret" "users" {
   name                    = "users_passwords"
   recovery_window_in_days = 0
 }
 
-resource "aws_secretsmanager_secret_version" "users1" {
-  for_each  = toset(["sysadmin1", "sysadmin2"])
-  secret_id = aws_secretsmanager_secret.users.id
-  secret_string = jsonencode({
-    username = "${aws_iam_user.SysAdmin[each.key].name}"
-    password = "${aws_iam_user_login_profile.p1[each.key].password}"
-  })
-}
+# resource "aws_secretsmanager_secret_version" "users1" {
+#   for_each  = toset(["sysadmin1", "sysadmin2"])
+#   secret_id = aws_secretsmanager_secret.users.id
+#   secret_string = jsonencode({
+#     username = "${aws_iam_user.SysAdmin[each.key].name}"
+#     password = "${aws_iam_user_login_profile.p1[each.key].password}"
+#   })
+# }
 
-resource "aws_secretsmanager_secret_version" "users2" {
-  for_each  = toset(["dbadmin1", "dbadmin2"])
-  secret_id = aws_secretsmanager_secret.users.id
-  secret_string = jsonencode({
-    username = "${aws_iam_user.DBAdmin[each.key].name}"
-    password = "${aws_iam_user_login_profile.p2[each.key].password}"
-  })
-}
+# resource "aws_secretsmanager_secret_version" "users2" {
+#   for_each  = toset(["dbadmin1", "dbadmin2"])
+#   secret_id = aws_secretsmanager_secret.users.id
+#   secret_string = jsonencode({
+#     username = "${aws_iam_user.DBAdmin[each.key].name}"
+#     password = "${aws_iam_user_login_profile.p2[each.key].password}"
+#   })
+# }
 
-resource "aws_secretsmanager_secret_version" "users3" {
-  for_each  = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
-  secret_id = aws_secretsmanager_secret.users.id
-  secret_string = jsonencode({
-    username = "${aws_iam_user.Monitoring[each.key].name}"
-    password = "${aws_iam_user_login_profile.p3[each.key].password}"
-  })
-}
+# resource "aws_secretsmanager_secret_version" "users3" {
+#   for_each  = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
+#   secret_id = aws_secretsmanager_secret.users.id
+#   secret_string = jsonencode({
+#     username = "${aws_iam_user.Monitoring[each.key].name}"
+#     password = "${aws_iam_user_login_profile.p3[each.key].password}"
+#   })
+# }
+
+
+
+# # Create access keys for users
+# resource "aws_iam_access_key" "user_access_keys1" {
+#   for_each = toset(["sysadmin1", "sysadmin2"])
+#   user     = aws_iam_user.SysAdmin[each.key].name
+# }
+# resource "aws_iam_access_key" "user_access_keys2" {
+#   for_each = toset(["dbadmin1", "dbadmin2"])
+#   user     = aws_iam_user.DBAdmin[each.key].name
+# }
+# resource "aws_iam_access_key" "user_access_keys3" {
+#   for_each = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
+#   user     = aws_iam_user.Monitoring[each.key].name
+# }
+
+
+

@@ -45,3 +45,9 @@ variable "security_groups" {
   }))
   default = {}
 }
+variable "users" {
+  type = map(object({
+    name = string
+  }))
+  default = {}
+}
