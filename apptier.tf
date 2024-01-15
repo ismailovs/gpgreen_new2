@@ -4,9 +4,10 @@ resource "aws_launch_template" "template-app" {
   image_id               = "ami-01450e8988a4e7f44"
   key_name               = aws_key_pair.key.id
   instance_type          = "t2.micro"
+  user_data              = filebase64("${path.module}/web.sh")
   vpc_security_group_ids = [module.apptier_sg.security_group_id["apptier_sg"]]
   tags = {
-    Name = "${var.prefix}-apptier_alb_lt"
+    Name = "${var.prefix}-apptier_lt"
   }
   tag_specifications {
     resource_type = "instance"
@@ -16,28 +17,13 @@ resource "aws_launch_template" "template-app" {
     }
   }
 }
-#Auto Scaling Group app-1
-resource "aws_autoscaling_group" "asg-2a" {
+#Auto Scaling Group app
+resource "aws_autoscaling_group" "asg-app" {
   name                 = "autoscaling-group-apptier-2a"
-  vpc_zone_identifier  = [aws_subnet.pvt_subnet["subnet_pvt_2a"].id]
-  desired_capacity     = 1
-  max_size             = 2
-  min_size             = 1
-  health_check_type    = "ELB"
-  termination_policies = ["OldestInstance"]
-  target_group_arns    = [aws_lb_target_group.target_group_app.arn]
-  launch_template {
-    id      = aws_launch_template.template-app.id
-    version = "$Latest"
-  }
-}
-#Auto Scaling Group app-2
-resource "aws_autoscaling_group" "asg-2b" {
-  name                 = "autoscaling-group-apptier-2b"
-  vpc_zone_identifier  = [aws_subnet.pvt_subnet["subnet_pvt_2b"].id]
-  desired_capacity     = 1
-  max_size             = 2
-  min_size             = 1
+  vpc_zone_identifier  = [aws_subnet.pvt_subnet["subnet_pvt_2a"].id, aws_subnet.pvt_subnet["subnet_pvt_2b"].id]
+  desired_capacity     = 2
+  max_size             = 4
+  min_size             = 2
   health_check_type    = "ELB"
   termination_policies = ["OldestInstance"]
   target_group_arns    = [aws_lb_target_group.target_group_app.arn]
@@ -47,6 +33,12 @@ resource "aws_autoscaling_group" "asg-2b" {
   }
 }
 
+# resource "aws_autoscaling_attachment" "asa_app" {
+#   autoscaling_group_name = aws_autoscaling_group.asg-app.id
+#   lb_target_group_arn    = aws_lb_target_group.target_group_app.arn
+# }
+
+#__________________________________________________
 #Application LB for apptier
 resource "aws_lb" "apptier_alb" {
   name                       = "app-lb-tf"
@@ -69,11 +61,13 @@ resource "aws_lb_target_group" "target_group_app" {
   target_type = "instance"
   vpc_id      = aws_vpc.main.id
   health_check {
-    interval            = 100
+    interval            = 30
     path                = "/"
-    timeout             = 50
+    timeout             = 10
     healthy_threshold   = 2
     unhealthy_threshold = 2
+    port                = "traffic-port"
+    protocol            = "HTTP"
     matcher             = "200"
   }
   tags = {
@@ -93,16 +87,6 @@ resource "aws_lb_listener" "alb_listener_apptier" {
   tags = {
     Name = "${var.prefix}-apptier_alb_listener"
   }
-}
-
-resource "aws_autoscaling_attachment" "apptier_asa_2a" {
-  autoscaling_group_name = aws_autoscaling_group.asg-2a.id
-  lb_target_group_arn    = aws_lb_target_group.target_group_app.arn
-}
-
-resource "aws_autoscaling_attachment" "apptier_asa_2b" {
-  autoscaling_group_name = aws_autoscaling_group.asg-2b.id
-  lb_target_group_arn    = aws_lb_target_group.target_group_app.arn
 }
 
 # Output

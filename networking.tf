@@ -55,16 +55,16 @@ resource "aws_eip" "eip_a" {
   }
 }
 
-#EIP public_b (1)
-resource "aws_eip" "eip_b" {
-  domain = "vpc"
-  tags = {
-    Name = "${var.prefix}-EIP1b"
-  }
-}
+# #EIP public_b (1)
+# resource "aws_eip" "eip_b" {
+#   domain = "vpc"
+#   tags = {
+#     Name = "${var.prefix}-EIP1b"
+#   }
+# }
 
 #NAT Gateway subnet_public_1a
-resource "aws_nat_gateway" "gw-pub-1a" {
+resource "aws_nat_gateway" "ngw" {
   allocation_id = aws_eip.eip_a.id
   subnet_id     = aws_subnet.pub_subnet["subnet_pub_1a"].id
   tags = {
@@ -72,14 +72,14 @@ resource "aws_nat_gateway" "gw-pub-1a" {
   }
 }
 
-#NAT Gateway subnet_public_1b
-resource "aws_nat_gateway" "gw-pub-1b" {
-  allocation_id = aws_eip.eip_b.id
-  subnet_id     = aws_subnet.pub_subnet["subnet_pub_1b"].id
-  tags = {
-    Name = "${var.prefix}-ngw1b"
-  }
-}
+# #NAT Gateway subnet_public_1b
+# resource "aws_nat_gateway" "ngw" {
+#   allocation_id = aws_eip.eip_b.id
+#   subnet_id     = aws_subnet.pub_subnet["subnet_pub_1b"].id
+#   tags = {
+#     Name = "${var.prefix}-ngw1b"
+#   }
+# }
 
 #Route table(2)Public subnets 1a, 1b
 resource "aws_route_table" "rt_public" {
@@ -89,7 +89,7 @@ resource "aws_route_table" "rt_public" {
     gateway_id = aws_internet_gateway.gw.id
   }
   tags = {
-    Name = "gogreen-private AZone us-west-1a, us-west-1b"
+    Name = "gogreen-public AZone us-west-1a, us-west-1b"
   }
 }
 
@@ -102,13 +102,18 @@ resource "aws_route_table_association" "rta_pub_1b" {
   subnet_id      = aws_subnet.pub_subnet["subnet_pub_1b"].id
   route_table_id = aws_route_table.rt_public.id
 }
+resource "aws_route_table_association" "rta_pub_bastion" {
+  subnet_id      = aws_subnet.bastion.id
+  route_table_id = aws_route_table.rt_public.id
+}
+
 
 #Route Table (2) Private subnets 2a, 2b
 resource "aws_route_table" "rt_private_2a_2b" {
   vpc_id = aws_vpc.main.id
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.gw-pub-1a.id
+    nat_gateway_id = aws_nat_gateway.ngw.id
   }
   tags = {
     Name = "gogreen-private AZone us-west-2a, us-west-2b"

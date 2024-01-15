@@ -53,22 +53,22 @@ resource "aws_iam_group_policy_attachment" "db_admin" {
 # Membership
 resource "aws_iam_user_group_membership" "team1" {
   for_each = toset(["sysadmin1", "sysadmin2"])
-  user     = "${aws_iam_user.users[each.key].name}"
-  groups    =[
+  user     = aws_iam_user.users[each.key].name
+  groups = [
     "${aws_iam_group.sysadmin_group.name}"
   ]
 }
 resource "aws_iam_user_group_membership" "team2" {
   for_each = toset(["dbadmin1", "dbadmin2"])
-  user     = "${aws_iam_user.users[each.key].name}"
-  groups    =[
+  user     = aws_iam_user.users[each.key].name
+  groups = [
     "${aws_iam_group.dbadmin_group.name}"
   ]
 }
 resource "aws_iam_user_group_membership" "team3" {
   for_each = toset(["monitor1", "monitor2", "monitor3", "monitor4"])
-  user     = "${aws_iam_user.users[each.key].name}"
-  groups    =[
+  user     = aws_iam_user.users[each.key].name
+  groups = [
     "${aws_iam_group.Monitoring_Group.name}"
   ]
 }
