@@ -98,32 +98,18 @@ resource "aws_secretsmanager_secret" "users" {
   recovery_window_in_days = 0
 }
 
-# resource "aws_secretsmanager_secret_version" "users1" {
-#   for_each  = toset(["sysadmin1", "sysadmin2"])
-#   secret_id = aws_secretsmanager_secret.users.id
-#   secret_string = jsonencode({
-#     username = "${aws_iam_user.SysAdmin[each.key].name}"
-#     password = "${aws_iam_user_login_profile.p1[each.key].password}"
-#   })
-# }
+resource "aws_secretsmanager_secret_version" "users" {
+    for_each = var.users
+    secret_id = aws_secretsmanager_secret.users.id
+    secret_string = jsonencode({
+    username = aws_iam_user.users[each.key].name
+    password = aws_iam_user_login_profile.pass[each.key].password
+  })
+}
 
-# resource "aws_secretsmanager_secret_version" "users2" {
-#   for_each  = toset(["dbadmin1", "dbadmin2"])
-#   secret_id = aws_secretsmanager_secret.users.id
-#   secret_string = jsonencode({
-#     username = "${aws_iam_user.DBAdmin[each.key].name}"
-#     password = "${aws_iam_user_login_profile.p2[each.key].password}"
-#   })
-# }
 
-# resource "aws_secretsmanager_secret_version" "users3" {
-#   for_each  = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
-#   secret_id = aws_secretsmanager_secret.users.id
-#   secret_string = jsonencode({
-#     username = "${aws_iam_user.Monitoring[each.key].name}"
-#     password = "${aws_iam_user_login_profile.p3[each.key].password}"
-#   })
-# }
+
+
 
 
 
