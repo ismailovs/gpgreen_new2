@@ -3,7 +3,7 @@ resource "aws_launch_template" "template-web" {
   name_prefix            = "webtier-instance"
   image_id               = "ami-01450e8988a4e7f44"
   key_name               = aws_key_pair.key.id
-  instance_type          = "t2.micro"
+  instance_type          = "t3.micro"
   user_data              = filebase64("${path.module}/web.sh")
   vpc_security_group_ids = [module.webtier_sg.security_group_id["webtier_sg"]]
   tags = {
@@ -60,15 +60,16 @@ resource "aws_lb_target_group" "target_group_web" {
   protocol    = "HTTP"
   target_type = "instance"
   vpc_id      = aws_vpc.main.id
-  health_check {
-    interval            = 30
-    path                = "/"
-    timeout             = 10
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    port                = "traffic-port"
-    protocol            = "HTTP"
-    matcher             = "200"
+  health_check {        
+    enabled             = true        
+    healthy_threshold   = 5        
+    interval            = 30        
+    matcher             = "200"        
+    path                = "/health"        
+    port                = "traffic-port"        
+    protocol            = "HTTP"        
+    timeout             = 5        
+    unhealthy_threshold = 2    
   }
   tags = {
     Name = "${var.prefix}-target_group_web"

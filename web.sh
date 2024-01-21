@@ -4,6 +4,7 @@
  sudo dnf -y update
   # Install MySQL Community Server
  sudo dnf -y install https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm
+ sudo dnf -y update
  sudo dnf -y install mysql-community-server
  
  # Start and enable MySQL

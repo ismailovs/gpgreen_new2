@@ -81,8 +81,8 @@ module "apptier_sg" {
       ingress_rules = [
         {
           description     = "http"
-          from_port       = 8080
-          to_port         = 8080
+          from_port       = 80
+          to_port         = 80
           protocol        = "tcp"
           security_groups = [module.webtier_sg.security_group_id["webtier_sg"]]
         },
@@ -182,8 +182,8 @@ module "apptier_alb_sg" {
       ingress_rules = [
         {
           description     = "ingress rule for http"
-          from_port       = 8080
-          to_port         = 8080
+          from_port       = 80
+          to_port         = 80
           protocol        = "tcp"
           security_groups = [module.webtier_sg.security_group_id["webtier_sg"]]
         },

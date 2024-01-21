@@ -113,19 +113,19 @@ resource "aws_secretsmanager_secret_version" "users" {
 
 
 
-# # Create access keys for users
-# resource "aws_iam_access_key" "user_access_keys1" {
-#   for_each = toset(["sysadmin1", "sysadmin2"])
-#   user     = aws_iam_user.SysAdmin[each.key].name
-# }
-# resource "aws_iam_access_key" "user_access_keys2" {
-#   for_each = toset(["dbadmin1", "dbadmin2"])
-#   user     = aws_iam_user.DBAdmin[each.key].name
-# }
-# resource "aws_iam_access_key" "user_access_keys3" {
-#   for_each = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
-#   user     = aws_iam_user.Monitoring[each.key].name
-# }
+# # # Create access keys for users
+# # resource "aws_iam_access_key" "user_access_keys1" {
+# #   for_each = toset(["sysadmin1", "sysadmin2"])
+# #   user     = aws_iam_user.SysAdmin[each.key].name
+# # }
+# # resource "aws_iam_access_key" "user_access_keys2" {
+# #   for_each = toset(["dbadmin1", "dbadmin2"])
+# #   user     = aws_iam_user.DBAdmin[each.key].name
+# # }
+# # resource "aws_iam_access_key" "user_access_keys3" {
+# #   for_each = toset(["monitoruser1", "monitoruser2", "monitoruser3", "monitoruser4"])
+# #   user     = aws_iam_user.Monitoring[each.key].name
+# # }
 
 
 

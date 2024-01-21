@@ -55,16 +55,16 @@ resource "aws_eip" "eip_a" {
   }
 }
 
-# #EIP public_b (1)
-# resource "aws_eip" "eip_b" {
-#   domain = "vpc"
-#   tags = {
-#     Name = "${var.prefix}-EIP1b"
-#   }
-# }
+#EIP public_b (1)
+resource "aws_eip" "eip_b" {
+  domain = "vpc"
+  tags = {
+    Name = "${var.prefix}-EIP1b"
+  }
+}
 
 #NAT Gateway subnet_public_1a
-resource "aws_nat_gateway" "ngw" {
+resource "aws_nat_gateway" "ngw1" {
   allocation_id = aws_eip.eip_a.id
   subnet_id     = aws_subnet.pub_subnet["subnet_pub_1a"].id
   tags = {
@@ -72,14 +72,14 @@ resource "aws_nat_gateway" "ngw" {
   }
 }
 
-# #NAT Gateway subnet_public_1b
-# resource "aws_nat_gateway" "ngw" {
-#   allocation_id = aws_eip.eip_b.id
-#   subnet_id     = aws_subnet.pub_subnet["subnet_pub_1b"].id
-#   tags = {
-#     Name = "${var.prefix}-ngw1b"
-#   }
-# }
+#NAT Gateway subnet_public_1b
+resource "aws_nat_gateway" "ngw2" {
+  allocation_id = aws_eip.eip_b.id
+  subnet_id     = aws_subnet.pub_subnet["subnet_pub_1b"].id
+  tags = {
+    Name = "${var.prefix}-ngw1b"
+  }
+}
 
 #Route table(2)Public subnets 1a, 1b
 resource "aws_route_table" "rt_public" {
@@ -113,7 +113,7 @@ resource "aws_route_table" "rt_private_2a_2b" {
   vpc_id = aws_vpc.main.id
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.ngw.id
+    nat_gateway_id = aws_nat_gateway.ngw1.id
   }
   tags = {
     Name = "gogreen-private AZone us-west-2a, us-west-2b"
