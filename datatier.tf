@@ -32,7 +32,7 @@ resource "aws_db_instance" "gogreen_db" {
   instance_class    = "db.t2.micro"
   allocated_storage = 20
 
-  username = "admin"
+  username = "admin"  
   password = random_password.password.result
   port     = 3306
 
