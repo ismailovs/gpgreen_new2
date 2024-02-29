@@ -49,24 +49,24 @@ resource "aws_sns_topic" "app_sns" {
 resource "aws_sns_topic_subscription" "sms_subscription-web" {
   topic_arn = aws_sns_topic.web_sns.arn
   protocol  = "sms"
-  endpoint  = "+15135259935" # Replace with the phone number to receive SMS
+  endpoint  = "+1513******" # Replace with the phone number to receive SMS
 }
 # Create an SNS subscription for email - web
 resource "aws_sns_topic_subscription" "email_subscription-web" {
   topic_arn = aws_sns_topic.web_sns.arn
   protocol  = "email"
-  endpoint  = "shuhx7@gmail.com" # Replace with the email address to receive emails
+  endpoint  = "*****@gmail.com" # Replace with the email address to receive emails
 }
 
 # Create an SNS subscription for SMS - app
 resource "aws_sns_topic_subscription" "sms_subscription-app" {
   topic_arn = aws_sns_topic.app_sns.arn
   protocol  = "sms"
-  endpoint  = "+15135259935" # Replace with the phone number to receive SMS
+  endpoint  = "+1513******" # Replace with the phone number to receive SMS
 }
 # Create an SNS subscription for email - app
 resource "aws_sns_topic_subscription" "email_subscription-app" {
   topic_arn = aws_sns_topic.app_sns.arn
   protocol  = "email"
-  endpoint  = "shuhx7@gmail.com" # Replace with the email address to receive emails
+  endpoint  = "*****@gmail.com" # Replace with the email address to receive emails
 }
